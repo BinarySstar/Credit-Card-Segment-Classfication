@@ -3,9 +3,6 @@ import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 import time
 
-class load_data():
-    pass
-
 class NumericTypeOptimizer(BaseEstimator, TransformerMixin):
     def __init__(self, mode='post', verbose=True):
         """
@@ -22,9 +19,11 @@ class NumericTypeOptimizer(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         df = X.copy()
+        if self.verbose:
+            print("Numeric Type Optimizer Transforming...")
         start_mem = df.memory_usage(deep=True).sum() / 1024**2
 
-        for col in df.select_dtypes(include=['int', 'float']).columns:
+        for col in df.select_dtypes(include=['number']).columns:
             col_type = df[col].dtypes
             c_min, c_max = df[col].min(), df[col].max()
 
@@ -93,18 +92,22 @@ class ObjectFeaturePreprocessor(BaseEstimator, TransformerMixin):
     def transform(self, X):
         if self.verbose:
             print("Object Feature Preprocessor Transforming...")
+        
+        # 조기 종료
+        if self.cols_to_keep == []:
+            if self.verbose:
+                print("✅ No object columns to transform.")
+            return X
+        
         start = time.time()
         x_out = X.copy()
-
-        drop_cols = [col for col in x_out.columns if col not in self.cols_to_keep]
-        x_out = x_out.drop(columns=drop_cols)
 
         for col in self.cols_to_keep:
             x_out[col] = x_out[col].fillna(self.fillna_value)
             x_out[col] = x_out[col].astype('category')
         
         # encoding
-        dummies = pd.get_dummies(x_out, columns=self.cols_to_keep, drop_first=True, dtype=int)
+        dummies = pd.get_dummies(x_out[self.cols_to_keep], drop_first=True, dtype=int)
         x_out = x_out.drop(columns=self.cols_to_keep)
         x_out = pd.concat([x_out, dummies], axis=1)
         
@@ -193,7 +196,8 @@ class DateElapsedTransformer(BaseEstimator, TransformerMixin):
             elapsed_col_name = f"{col}_경과일"
 
             x_out[elapsed_col_name] = elapsed_days.fillna(self.fillna_value).astype(int)
-            x_out = x_out.drop(columns=col)
+        
+        x_out = x_out.drop(columns=self.date_cols)
         
         end = time.time()
         if self.verbose:
