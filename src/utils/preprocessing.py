@@ -102,6 +102,10 @@ class ObjectFeaturePreprocessor(BaseEstimator, TransformerMixin):
         start = time.time()
         x_out = X.copy()
 
+        object_cols = x_out.select_dtypes(include=['object']).columns
+        to_drop = [col for col in object_cols if col not in self.cols_to_keep]
+        x_out = x_out.drop(columns=to_drop)
+
         for col in self.cols_to_keep:
             x_out[col] = x_out[col].fillna(self.fillna_value)
             x_out[col] = x_out[col].astype('category')
@@ -194,7 +198,9 @@ class DateElapsedTransformer(BaseEstimator, TransformerMixin):
             parsed_col = pd.to_datetime(col_series, format='%Y%m%d',errors='coerce')
             elapsed_days = (parsed_col - self.base_date).dt.days
             elapsed_col_name = f"{col}_경과일"
+            is_na = f"missing_{col}"
 
+            x_out[is_na] = elapsed_days.isna().astype(int)
             x_out[elapsed_col_name] = elapsed_days.fillna(self.fillna_value).astype(int)
         
         x_out = x_out.drop(columns=self.date_cols)

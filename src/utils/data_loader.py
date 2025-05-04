@@ -32,3 +32,10 @@ def load_data(folder_name : str):
     print(f"🔹 Shape : {test_df.shape}")
 
     return df, test_df
+
+def load_segment():
+    segment_path = '../../dataset/train/member.parquet'
+    segment_df = pd.read_parquet(segment_path, engine='fastparquet')
+
+    segment_df = segment_df['Segment']
+    return segment_df
