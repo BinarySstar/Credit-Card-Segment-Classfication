@@ -69,58 +69,67 @@ class ObjectFeaturePreprocessor(BaseEstimator, TransformerMixin):
     def __init__(self, fillna_value='unknown', drop_unique_thresh=1, exclude_columns=None, verbose=True):
         self.fillna_value = fillna_value
         self.drop_unique_thresh = drop_unique_thresh
-        self.exclude_columns = exclude_columns if exclude_columns else ['ID','Segment']
+        self.exclude_columns = exclude_columns if exclude_columns else ['ID', 'Segment']
         self.cols_to_keep = []
         self.verbose = verbose
-    
+        self.dummy_columns_ = None 
+        
     def fit(self, X, y=None):
         if self.verbose:
             print("Object Feature Preprocessor Fitting...")
+
         object_cols = X.select_dtypes(include=['object']).columns
         object_cols = [col for col in object_cols if col not in self.exclude_columns]
-        
+
+        if not object_cols:
+            if self.verbose:
+                print("✅ No object columns to transform.")
+            return self
+
         for col in object_cols:
-            unique_count = X[col].nunique(dropna=False)
-            if unique_count > self.drop_unique_thresh:
+            if X[col].nunique(dropna=False) > self.drop_unique_thresh:
                 self.cols_to_keep.append(col)
-        
-        if self.verbose:
-            print(f"✅ Total object columns: {self.cols_to_keep}")
-            print(f"✅ Total object columns to keep: {len(self.cols_to_keep)}")
+
+        X_copy = X[self.cols_to_keep].copy()
+        for col in self.cols_to_keep:
+            X_copy[col] = X_copy[col].fillna(self.fillna_value).astype("category")
+
+        dummies = pd.get_dummies(X_copy, drop_first=True, dtype=int)
+        self.dummy_columns_ = dummies.columns 
+
         return self
-    
+
     def transform(self, X):
         if self.verbose:
             print("Object Feature Preprocessor Transforming...")
-        
-        # 조기 종료
-        if self.cols_to_keep == []:
+
+        x_out = X.copy()
+
+        if not self.cols_to_keep:
             if self.verbose:
                 print("✅ No object columns to transform.")
-            return X
-        
-        start = time.time()
-        x_out = X.copy()
+            return x_out
 
         object_cols = x_out.select_dtypes(include=['object']).columns
         to_drop = [col for col in object_cols if col not in self.cols_to_keep]
         x_out = x_out.drop(columns=to_drop)
 
         for col in self.cols_to_keep:
-            x_out[col] = x_out[col].fillna(self.fillna_value)
-            x_out[col] = x_out[col].astype('category')
-        
-        # encoding
+            x_out[col] = x_out[col].fillna(self.fillna_value).astype('category')
+
         dummies = pd.get_dummies(x_out[self.cols_to_keep], drop_first=True, dtype=int)
+
+        # ✅ 누락된 컬럼은 0으로 채움
+        for col in self.dummy_columns_:
+            if col not in dummies:
+                dummies[col] = 0
+        dummies = dummies[self.dummy_columns_]  # 순서 고정
+
         x_out = x_out.drop(columns=self.cols_to_keep)
         x_out = pd.concat([x_out, dummies], axis=1)
-        
-        end = time.time()
-        if self.verbose:
-            print(f"✅ Transformed Complete!")
-            print(f"🔹 Transformation Time: {end - start:.2f} seconds")
-            print(f"🔹 Shape after transformation: {x_out.shape}")
+
         return x_out
+
 
 class NumericFeaturePreprocessor(BaseEstimator, TransformerMixin):
     def __init__(self, drop_unique_thresh=1, exclude_columns=None, verbose=True):
