@@ -33,27 +33,28 @@ Credit-Card-Segment-Classification/
 1. **[uv](https://github.com/astral-sh/uv) 설치**
 ```bash
 # On macOS and Linux.
-$ curl -LsSf https://astral.sh/uv/install.sh | sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # On Windows.
-$ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
+그 이후로 콘솔에 나오는 uv 환경변수 설정 명령어를 복사하고 실행하여 환경변수를 설정합니다.
 
 2. **Python 버전 설정**
 ```bash
-$ uv venv --python 3.10.6
+uv venv --python 3.10.6
 ```
 - Python 3.10.6을 이용할 수 있으면 이 과정은 생략할 수 있습니다.
 
 3. **가상환경 실행 및 의존성 설치**
 ```bash
 # On macOS and Linux.
-$ source .venv/bin/activate       
+source .venv/bin/activate       
 
 # On Windows. 
-$ .venv\Scripts\activate
+.venv\Scripts\activate
 
-$ uv pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 이후 eda 폴더 내의 .ipynb 파일을 모두 실행 후 train.ipynb를 실행하여 데이터 전처리와 모델 학습을 진행할 수 있습니다.
