@@ -24,10 +24,9 @@ Credit-Card-Segment-Classification/
 ├── requirements.txt         
 ├── README.md                
 └── result/                  # 모델 및 파라미터 저장
-
 ```
 - `dataset/`는 대회 제공 데이터를 저장하는 위치입니다.
-- 대회 방침에 의해 데이터는 업로드할 수 없으므로 Dacon에서 직접 데이터를 다운로드 받아 `dataset/` 폴더에 직접 저장해야 합니다. (초반에 첨부한 링크로 접속 가능)
+- 대회 방침에 의해 데이터는 업로드할 수 없으므로 Dacon에서 직접 데이터를 다운로드 받아 `dataset/` 폴더에 직접 저장해야 합니다. (첨부한 링크로 접속 가능)
 
 ## 4. ▶️ 프로젝트 실행 방법
 
@@ -63,13 +62,13 @@ $ uv pip install -r requirements.txt
 - CatBoostClassifier 기반 분류 모델 설계
 - Macro F1-score: 0.63
 - 클래스 불균형 대응: 클래스 가중치 적용
-![Segment 분포포](images\segment_distribution.png)
+
 $$
-w_i = \frac{N}{K \cdot n_i}
+w_c = \frac{N}{K \cdot n_c}
 $$
 
-    - \( N \): 전체 샘플 수  
-    - \( K \): 전체 클래스 수  
-    - \( n_c \): 클래스 \( c \)에 속한 샘플 수
+    - N: 전체 샘플 수  
+    - K: 전체 클래스 수  
+    - n_{c}: 클래스 c에 속한 샘플 수
 
 - Scikit-learn 기반 커스텀 전처리 파이프라인 구현
