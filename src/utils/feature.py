@@ -28,7 +28,7 @@ class FeatureSelector(BaseEstimator, TransformerMixin):
         )
         rf.fit(X, y)
 
-        self.selector = SelectFromModel(rf, prefit=True)
+        self.selector = SelectFromModel(rf, threshold="0.5*mean",prefit=True)
         self.feature_names_ = X.columns[self.selector.get_support()]
 
         self.importances_ = rf.feature_importances_

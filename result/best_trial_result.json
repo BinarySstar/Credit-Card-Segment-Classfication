@@ -1,0 +1,11 @@
+{
+    "value": 0.8483944577895072,
+    "params": {
+        "learning_rate": 0.25582637176130274,
+        "l2_leaf_reg": 3.409181833449474,
+        "random_strength": 5.206935892827906,
+        "bagging_temperature": 0.24621119892533475,
+        "depth": 10,
+        "iterations": 511
+    }
+}
